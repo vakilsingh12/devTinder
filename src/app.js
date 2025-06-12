@@ -1,9 +1,18 @@
 const express = require("express");
 const app = express();
-app.get("/user/:id/:name", (req, res) => {
-    console.log(req.query.userid,req.params);
-  res.status(200).json({msg:"test routes Hello from node js server",query:req.query.userid,name_params:req.params.name});
-});
+
+// app.use("/route",rh1,[rh2,rh3],rh4)   this is perfeclty fine
+app.use("/user", [
+  (req, res, next) => {
+    next();
+    // res.send("user response 1");
+  },
+  (req, res, next) => {
+    console.log("response 2");
+    res.send("user response 2");
+    // next();
+  },
+]);
 
 app.listen(3000, () => {
   console.log("server is running on port 3000...");
