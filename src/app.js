@@ -1,19 +1,20 @@
 const express = require("express");
 const app = express();
-
-// app.use("/route",rh1,[rh2,rh3],rh4)   this is perfeclty fine
-app.use("/user", [
-  (req, res, next) => {
-    next();
-    // res.send("user response 1");
-  },
-  (req, res, next) => {
-    console.log("response 2");
-    res.send("user response 2");
-    // next();
-  },
-]);
-
+app.get("/user", (req, res) => {
+  console.log("user api");
+  // try {
+    throw new Error("router error");
+    res.send("get user data ");
+  // } catch (err) {
+  //   res.status(500).send("Something wrong");
+  // }
+});
+app.use("/", (err, req, res, next) => {
+  console.log("Hii there");
+  if (err) {
+    res.status(500).send("Something went wrong");
+  }
+});
 app.listen(3000, () => {
   console.log("server is running on port 3000...");
 });
