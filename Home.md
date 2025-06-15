@@ -71,3 +71,7 @@ app.use("/", (err, req, res, next) => {
     res.status(500).send("Something went wrong");
   }
 });
+
+
+Database connection : 
+mongodb+srv://namastedev:TGmSfquq9Qt89HoG@namstenode.9ido0mx.mongodb.net/?retryWrites=true&w=majority&appName=NamsteNode
