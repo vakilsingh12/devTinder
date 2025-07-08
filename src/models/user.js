@@ -20,7 +20,6 @@ let userSchema = new mongoose.Schema(
       unique: true,
       trim: true,
       validate(value) {
-        console.log(value);
         if (!validator.isEmail(value)) {
           throw new Error("Email is not valid!");
         }

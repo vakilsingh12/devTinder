@@ -4,12 +4,16 @@ const User = require("./models/user");
 const { validateSignUpData } = require("./utils/validation");
 const bcrypt = require("bcryptjs");
 const validator = require("validator");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
+const { userAuth } = require("./middlewares/auth");
 const app = express();
 app.use(express.json());
-app.get("/user", async (req, res) => {
-  // const userEmail = req.body.emailId;
+app.use(cookieParser());
+app.get("/user", userAuth, async (req, res) => {
+  const userEmail = req.body.emailId;
   try {
-    const user = await User.findOne();
+    const user = await User.findOne({ emailId: userEmail });
     if (!user) {
       res.status(404).send("user not found!");
     } else {
@@ -57,13 +61,23 @@ app.post("/login", async (req, res) => {
       throw new Error("Invalid credientials!");
     }
     const isPasswordValid = await bcrypt.compare(password, getUser.password);
-    if(isPasswordValid){
-      res.status(200).send("User login Successfully!")
-    }else{
+    if (isPasswordValid) {
+      const token = jwt.sign({ _id: getUser._id }, "DEV@tinder98777");
+      res.cookie("token", token);
+      res.status(200).send("User login Successfully!");
+    } else {
       throw new Error("Username & Password is not correct!");
     }
   } catch (err) {
     res.status(400).send(`Something went wrong! ${err.message}`);
+  }
+});
+app.get("/profile", userAuth, async (req, res) => {
+  try {
+    const user = req.user;
+    res.send(user);
+  } catch (err) {
+    res.status(500).send(`Something went wrong,${err}`);
   }
 });
 app.delete("/user", async (req, res) => {
@@ -96,7 +110,7 @@ app.patch("/user/:userId", async (req, res) => {
     if (data?.skills?.length > 10) {
       throw new Error("Skills can't be more than 10");
     }
-    const user = await User.findByIdAndUpdate({ _id: userId }, data, {
+    await User.findByIdAndUpdate({ _id: userId }, data, {
       returnDocument: "after",
       runValidators: true,
     });
