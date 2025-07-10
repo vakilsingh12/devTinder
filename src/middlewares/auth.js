@@ -8,14 +8,14 @@ const userAuth = async (req, res, next) => {
     }
     const decodedData = await jwt.verify(token, "DEV@tinder98777");
     const { _id } = decodedData;
-    const user = User.findById(_id);
+    const user = await User.findById(_id);
     if (!user) {
       throw new Error("User not found!");
     }
     req.user = user;
     next();
   } catch (err) {
-    res.status(400).send("Something went wrong" + err.message);
+    res.status(400).send("Error: " + err.message);
   }
 };
 module.exports = { userAuth };

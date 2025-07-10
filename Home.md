@@ -75,3 +75,68 @@ app.use("/", (err, req, res, next) => {
 
 Database connection : 
 mongodb+srv://namastedev:TGmSfquq9Qt89HoG@namstenode.9ido0mx.mongodb.net/?retryWrites=true&w=majority&appName=NamsteNode
+
+
+
+app.get("/user", userAuth, async (req, res) => {
+  const userEmail = req.body.emailId;
+  try {
+    const user = await User.findOne({ emailId: userEmail });
+    if (!user) {
+      res.status(404).send("user not found!");
+    } else {
+      res.status(200).send(user);
+    }
+  } catch (err) {
+    res.status(400).send("Something went wrong");
+  }
+});
+app.get("/feed", async (req, res, next) => {
+  try {
+    const users = await User.find({});
+    res.status(200).send(users);
+  } catch (err) {
+    res.status(500).send("Something went wrong");
+  }
+});
+
+app.delete("/user", async (req, res) => {
+  const userId = req.body.userId;
+  try {
+    await User.findByIdAndDelete(userId);
+    res.status(200).send("User deleted successfully!");
+  } catch (err) {
+    res.status(400).send("Something went wrong");
+  }
+});
+app.patch("/user/:userId", async (req, res) => {
+  const userId = req.params?.userId;
+  const data = req.body;
+  try {
+    const UPDATE_FIELDS = [
+      "firstName",
+      "lastName",
+      "gendar",
+      "about",
+      "skills",
+      "photoUrl",
+    ];
+    const isUpdatedAllowed = Object.keys(data).every((k) =>
+      UPDATE_FIELDS.includes(k)
+    );
+    if (!isUpdatedAllowed) {
+      throw new Error("Updates are not allowed!");
+    }
+    if (data?.skills?.length > 10) {
+      throw new Error("Skills can't be more than 10");
+    }
+    await User.findByIdAndUpdate({ _id: userId }, data, {
+      returnDocument: "after",
+      runValidators: true,
+    });
+    res.status(200).send("user updated Sucessfully!");
+  } catch (err) {
+    console.log(err);
+    res.status(500).send("Something went wrong!", err.message);
+  }
+});
