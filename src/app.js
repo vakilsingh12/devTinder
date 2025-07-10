@@ -39,10 +39,12 @@ app.post("/login", async (req, res) => {
     if (!getUser) {
       throw new Error("Invalid credientials!");
     }
-    const isPasswordValid = await bcrypt.compare(password, getUser.password);
+    const isPasswordValid = await getUser.validatePassword(password);
     if (isPasswordValid) {
-      const token = jwt.sign({ _id: getUser._id }, "DEV@tinder98777");
-      res.cookie("token", token);
+      const token = await getUser.getJWT();
+      res.cookie("token", token, {
+        expires: new Date(Date.now() + 1 * 3600000),
+      });
       res.status(200).send("User login Successfully!");
     } else {
       throw new Error("Username & Password is not correct!");
@@ -59,9 +61,9 @@ app.get("/profile", userAuth, async (req, res) => {
     res.status(500).send(`Something went wrong,${err}`);
   }
 });
-app.post("/sendConnectionrequest",userAuth, async (req, res) => {
-  const user=req.user;
-  res.send(user.firstName+" connection request sent");
+app.post("/sendConnectionrequest", userAuth, async (req, res) => {
+  const user = req.user;
+  res.send(user.firstName + " connection request sent");
 });
 connectDB()
   .then(() => {
